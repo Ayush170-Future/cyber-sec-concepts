@@ -1,0 +1,17 @@
+Blind SQL Injection: Attacher has no evident idea that his attack suceeded or not.
+- ' AND sleep(5); --'; => slow response => Tells the attacker that the vulnerability exist => executes other attacks
+- Good video: https://www.youtube.com/watch?v=S4qtRFsuKVY 
+
+
+
+Preventions:
+Goal: How can we treat the data as data not SQL statements?
+
+Solutions:
+SQL Sanitizations: Render the input and Place \ before ' before adding the input to the query - there are famous libraries to do this,
+SQL Prepared statements: have the placeholder for the input inside the SQL query,
+Allowed list for the inputs
+
+Note:
+Prepared statements: SQL queries has placeholders and these placeholders are attached with the data provided by the user.
+                     so now the data is treated differently, no confused with the SQL query.

