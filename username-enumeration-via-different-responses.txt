@@ -1,0 +1,9 @@
+Username enumeration via different responses
+
+First Brute forced the username.
+Observations: Biggest response length and had "Incorrect passowrd" in the response.
+
+Then Brute forced the password.
+Observations: This time the response was the shortest.
+
+Result: username = ads, passowrd = moscow

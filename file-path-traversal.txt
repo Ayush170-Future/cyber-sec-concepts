@@ -1,0 +1,24 @@
+Description:
+By file path traversal I can get access to files on the server machine (unix or not)
+
+Image URL: https://0ae0000004e251158151436d00a0005a.web-security-academy.net/image?filename=61.jpg
+Exploit that got me the access:
+https://0ae0000004e251158151436d00a0005a.web-security-academy.net/image?filename=../../../etc/passwd
+
+
+Fuzzing with different encoded file paths to check if any works or not.
+
+
+
+Same preventions as the SQL injection ones:
+ - Sanitize the inputs
+ - Treat the input as Data, do not directly concatinate it with the
+   file path.
+ - Canonicalize the path first and then check if it starts with the base dir or not.
+    Java code:
+    File file = new File(BASE_DIRECTORY, userInput);
+    if (file.getCanonicalPath().startsWith(BASE_DIRECTORY)) {
+        // process file
+    }
+
+

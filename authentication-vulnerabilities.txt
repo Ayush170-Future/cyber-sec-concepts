@@ -1,0 +1,6 @@
+Biggest Alpha for a security engineer:
+
+More than being an expert in security and engineering a
+security engineer needs to be an expert in human tendencies.
+for example, when a person changes their password it is also 
+common for users to just make minor, predictable changes to their preferred password
