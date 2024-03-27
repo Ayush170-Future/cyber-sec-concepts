@@ -1,0 +1,38 @@
+Lab1: Exploit an API endpoint using Documentation.
+
+Find the route with the Documentation. Mostly /api will have the Documentation
+and use those routes according to your needs. Finding route could be automated using
+Burp suite or it can be done manually for smaller applications.
+
+Tools for finding apis: Burp Scanner, JS Link Finder, Manually,
+built-in HTTP verbs list in the Burp Intruder to automate the fuzzing of apis.
+
+Inportant points:
+-- API end-points have strict and different content-types, therefore using different
+   content-types could discover new errors and new informations. Could use Content Type converter 
+   extension to switch b/w various content-type: XML to HTTP and vice-versa.
+
+   OPTIONS: used to extract information about the list of communications allowed for a particular end-point.
+   PATCH: used to update the information slightly.
+
+
+
+Lab2: Finding and exploiting an unused API endpoint
+
+Changed the GET end-point to OPTIONS, found out that GET AND PATCH valid communications methods.
+and used PATCH to change the price of a product and bought it!
+
+
+
+Mass assignment vulnerabilities and it's Lab:
+When the backend automaically binds the request object with an internal object.
+Then you could use POST, PATCH request to mutate the internal object and gain some
+access, or change the logic of the backend potentially.
+For example, the request obj could be linked with the internal User Objct in mongo or with the
+internal Product object, etc.
+
+
+Preventions:
+Hide your API Documentation if you don't want the API to be publically accessible.
+Validate Content-type for all requests.
+Don't give too much information away in the responses, only send what is necessary.

