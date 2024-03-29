@@ -1,0 +1,100 @@
+Server side request Forgery (SSRF).
+
+Reasons:
+Trust relationships: application developers assume that the requests coming from private IP or local machines are generally securer than outside ones.
+Improper validation of input data: user shouldn’t add URLs or IP addresses in the payload.
+
+
+Impact of SSRF:
+
+1. Get admin access or Data access on the same machine or another in the same private network.
+2. Command or Code execution on the same machine or another in the same private network.
+
+Types or different ways of SSRF:
+
+
+SSRF attack against the server:
+Loopback request to the same machine using localhost, 127.0.0.1, 127.1, URL encoded version, etc. For example: localhost/admin
+            (these would normally have access control, but since the request is coming from an        internal server we can assume it has lesser security than outside)
+	
+Reasons for different behaviour: 
+
+Access control can be implemented in different components like Load Balancer.
+For disaster recovery the admin might have access without logging in when the request is coming from a local or internal machine.
+
+SSRF attack against other back-end systems:
+
+Most backend systems in the same architecture have non-routable IP addresses therefore the end user can’t access them, so could use SSRF vulnerability to access them from the internal server. 
+For example, in the microservice architecture only some microservices are reachable only from internal servers for security reasons.
+	
+
+Work-around to common SSRF protections:
+
+1. SSRF with black-list input filters:
+ 	Maybe the 127.0.0.1, localhost, these kinds of input are blacklisted in the sanitization of the request payload. So, some kind of URL parsing is happening, so in order to bypass it we can use different formats of the localhost ip address, such as:
+
+
+127.1
+2130706433
+017700000001
+Buy a domain that points to the localhost. Or use burpcollaborator.
+Encode or hide or Obfuscate blocked string using URL encoding (present in the burp suite)
+
+Observation: localhost has blacklist and the admin is URL decoded one time
+Solution: use 127.1 and obfuscate admin’s a to  %2561 (two times URL encoding)
+Attack URL: https://127.1/%2561dmin
+
+2. SSRF with whitelist input filters:
+Very subjective (I think).
+Here unlike black-list, there are a bunch of strings that are only allowed, therefore we need to hide our “evil” URL somewhere in the valid URL so that our “evil” URL is completely camouflaged.
+This strictly depends on the kind of URL parsing being used in the backend.
+
+Observation: can use ‘#’’
+
+TODO: I’ve to learn popular types of URL parsing so that I can understand how to camouflage my URL into a good URL.
+
+SSRF via Open-redirection:
+The StockAPI might be very secure therefore you can’t use it to exploit but maybe the application has some open-redirection which we can exploit.
+
+
+Observation: The “next product” button is vulnerable since it has the URL path to the next product in the request itself. Therefore we can do this:
+
+
+/product/nextProduct?path=http://192.168.0.12:8080/admin
+
+Blind SSRF:
+My favourite kind of vulnerability is “Blind”.
+Here the response is not returned to the user, therefore we don’t know directly if the attack was successful or not.
+
+Ways to detect:
+Out of Band technique: Give the URL of the server you control and monitor for connections to it.
+Burp Collaborator: Gives unique domain names, sends these in the payloads and monitors for requests on the Burp Suite.
+    
+Note for Out of Band technique:
+Look for DNS lookups to the domain of your machine because maybe your IP is not being requested due to network protection in most cases your Domain name will be queried from a DNS server.
+
+
+Solution: Simple with Burp Collaborator.
+
+
+Remote Code Execution using SSRF:
+Visit 25th March 2024 in the diary.
+
+
+Protection:
+
+Don’t include the URL that is going to be visited by the application in the client request.
+Sanitise the payload, implement Blacklisting, whitelisting.
+Don’t have Trust relationships between Servers that are internal or external, every kind of request should have the same security measures.
+Maybe don’t implement access control in the other server. Implement some kind of access control in the same machine as well.
+Don’t allow external communication directly from an internal server as much as possible; this could save half of SSRF attacks.
+
+
+
+OWASP Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html 
+
+
+OWASP is better than Port Swigger in terms of learning since it has more practical use cases in the example.
+
+
+Google Doc: https://docs.google.com/document/d/1OIqkC2hjxp-ZDskgfkjV0ESR6hF3vu9p1_wGd20A1D0/edit 

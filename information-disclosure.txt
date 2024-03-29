@@ -1,0 +1,16 @@
+This is when unwanted informations or excess information is given to the consumers
+such as credit card details, overly verbose error messages.
+
+Preventions: Make sure every developer knows what is sensitive what is not.
+             Use generic error messages as much as you can, don't use custom messages.
+             Audit any code for potential information disclosure as part of your QA or 
+             build processes. (automate this in the pipeline)
+             Make sure your third-party softwares versions are latest and 
+             don't have any known vulnerabilities.
+
+Exploits: Get the versions of third-party frameworks/softwares being used through
+          Error messages or otherwise and figure out if it has some vulnerabilities in it..
+
+          Maybe the older versions have some vulnerabilities.
+
+          TRACK: http method is used to debug network connection, for http header.

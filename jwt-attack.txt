@@ -1,0 +1,83 @@
+JWT Attacks
+
+JWT format
+A JWT consists of 3 parts: a header, a payload, and a signature. These are each separated by a dot, as shown in the following example:
+eyJraWQiOiI5MTM2ZGRiMy1jYjBhLTRhMTktYTA3ZS1lYWRmNWE0NGM4YjUiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJwb3J0c3dpZ2dlciIsImV4cCI6MTY0ODAzNzE2NCwibmFtZSI6IkNhcmxvcyBNb250b3lhIiwic3ViIjoiY2FybG9zIiwicm9sZSI6ImJsb2dfYXV0aG9yIiwiZW1haWwiOiJjYXJsb3NAY2FybG9zLW1vbnRveWEubmV0IiwiaWF0IjoxNTE2MjM5MDIyfQ.SYZBPIBg2CRjXAJ8vCER0LA_ENjII1JakvNQoP-Hw6GG1zfl4JyngsZReIfqRvIAEi5L4HV0q7_9qGhQZvy9ZdxEJbwTxRs_6Lb-fZTDpW6lKYNdMyjw45_alSCZ1fypsMWz_2mTpQzil0lOtps5Ei_z7mM7M8gCwe_AGpI53JxduQOaB5HkT5gVrv9cKu9CsW5MS6ZbqYXpGyOG5ehoxqm8DL5tFYaW3lB50ELxi0KsuTKEbD0t5BCl0aCR2MBJWAbN-xeLwEenaqBiwPVvKixYleeDQiBEIylFdNNIMviKRgXiYuAvMziVPbwSgkZVHeEdF5MQP1Oe2Spac-6IfA
+
+Header: {kid: “number”, alg: “name”}
+Kid: is the id of the key used to sign this token.
+
+Payload is basically a “claim”:
+{
+    "iss": "portswigger",
+    "exp": 1648037164,
+    "name": "Carlos Montoya",
+    "sub": "carlos",
+    "role": "blog_author",
+    "email": "carlos@carlos-montoya.net",
+    "iat": 1516239022
+}
+
+Attack 1: JWT authentication bypass via unverified signature
+
+Two functions are used mostly in JWT Auth, verify() and decode().
+Sometimes the application might overlook and only do decode(), therefore you can change the payload using the “JWT editor” extension and it can get you admin privileges.
+Done: https://portswigger.net/web-security/jwt/lab-jwt-authentication-bypass-via-unverified-signature
+Check the solution if you forget.
+
+Attack 2: JWT authentication bypass via flawed signature verification
+
+Here the verification is happening but the verification is flawed. 
+For example, maybe if you change the Algo-type to “none” in the Token header then the application might assume that the Token is unsigned and move forward even if there is no signature (payload has to end with . tho)
+Done: https://portswigger.net/web-security/jwt/lab-jwt-authentication-bypass-via-flawed-signature-verification
+
+There could be different signing algorithms but they have to be Symmetric key cryptography, therefore mostly we use HS256 (HMAC + SHA256)
+
+Brute Forcing the secret key:
+
+The secret key is a simple string that is used to sign the Header + payload and sometimes the developers might have easy secret keys or they might have copied the code from the Internet therefore there are chances we can Brute-force this secret key. And as soon as we get the Secret key we are good.
+For verifying the correct secret key we just need a correct credential (wiener:peter) and we can check if these are equal.
+
+Good cryptographic algorithm property:
+Easy to verify, encode, and decode.
+Very difficult or infeasible to derive the key or brute force it.
+
+Tool: hashcat, very fast due to the property number 1.
+
+Attack 3: Lab: JWT authentication bypass via weak signing key
+
+Goal: Find the correct Signing key by brute forcing the token and matching.
+Goal 2: login to admin by creating a JWT for it and delete Carlos.
+
+Correct JWT for Wiener: eyJraWQiOiIxM2Y0YjZhYi0zMGMxLTQ0NTAtYWY5NS02NGIyYmVkMWYxNzAiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJwb3J0c3dpZ2dlciIsImV4cCI6MTcxMTcwNzE5NCwic3ViIjoid2llbmVyIn0.DA36uqEfnHl94vxunyUIod6sJcuEazah4RgwGRKILRs
+
+echo ‘eyJraWQiOiIxM2Y0YjZhYi0zMGMxLTQ0NTAtYWY5NS02NGIyYmVkMWYxNzAiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJwb3J0c3dpZ2dlciIsImV4cCI6MTcxMTcwNzE5NCwic3ViIjoid2llbmVyIn0.DA36uqEfnHl94vxunyUIod6sJcuEazah4RgwGRKILRs’ > /tmp/jwt.hash
+
+Command:  sudo hashcat -a 0 -m 16500 eyJraWQiOiIxM2Y0YjZhYi0zMGMxLTQ0NTAtYWY5NS02NGIyYmVkMWYxNzAiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJwb3J0c3dpZ2dlciIsImV4cCI6MTcxMTcwNzE5NCwic3ViIjoid2llbmVyIn0.DA36uqEfnHl94vxunyUIod6sJcuEazah4RgwGRKILRs
+ /Users/ayushsingh/Downloads/jwt.secrets.list
+
+Found Secret: Secret1
+
+
+Injecting self-signed JWTs via the jwk parameter
+The JSON Web Signature (JWS) specification describes an optional jwk header parameter, which servers can use to embed their public key directly within the token itself in JWK format.
+You can see an example of this in the following JWT header:
+{
+    "kid": "ed2Nf8sb-sD6ng0-scs5390g-fFD8sfxG",
+    "typ": "JWT",
+    "alg": "RS256",
+    "jwk": {
+        "kty": "RSA",
+        "e": "AQAB",
+        "kid": "ed2Nf8sb-sD6ng0-scs5390g-fFD8sfxG",
+        "n": "yy1wpYmffgXBxhAUJzHHocCuJolwDqql75ZWuCQ_cb33K2vh9m"
+    }
+}
+
+Sign the token with your private key and also embed the Public key in the jwk field and if the application is bad enough it will use the given Public key to verify and decode the token.
+Just add the new JWK (json web key)
+
+
+
+
+
