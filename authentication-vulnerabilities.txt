@@ -4,3 +4,55 @@ More than being an expert in security and engineering a
 security engineer needs to be an expert in human tendencies.
 for example, when a person changes their password it is also 
 common for users to just make minor, predictable changes to their preferred password
+
+Authentication is to verify the user is what they claim to be.
+Authorization is verifying if the the user is authorized to access that perticular resource.
+Authentication + Authorization should be done in the all the APIs.
+
+
+
+-- Check for Capcha (refer OWASP)
+
+Storing credentials client-side is a very bad idea since it increases the attack surface, therefore always store token on client side rather than credentials.
+
+-- Check the lockout machanism: is it time based, mail based, or manual, and design your brute force according to it.
+- If lockout machanism is not correctly validated then it could be used to generate Denail of service for other users. therefore, maybe it not wise to 
+lock the account, maybe lock the IP or something?
+https://security.stackexchange.com/questions/1653/protection-against-account-lockout-dos#:~:text=is%20behind%20a-,corporate%20NAT,-%2C%20but%20it%20is --> Checkout the Lockout machanism in Meesho.
+
+1. First use the Capcha,
+2. second ban the IP, but this may ban everyone inside the corporate NAT.
+3. On the first option, inform the administrator of some wrong doings.
+
+-- Check for Browser level cache weakness, it might be caching some sensitive information like credit card number, etc if it doesn't have good headers in place 
+that prevents the Browser to cache the pages.
+Cache-Control: no-cache, no-store
+Expires: 0
+Pragma: no-cache
+
+The exact location where that information is stored depends on the client operating system and on the browser that has been used. Here are some examples:
+
+Mozilla Firefox:
+Unix/Linux: ~/.cache/mozilla/firefox/
+Windows: C:\Users\<user_name>\AppData\Local\Mozilla\Firefox\Profiles\<profile-id>\Cache2\
+Internet Explorer:
+C:\Users\<user_name>\AppData\Local\Microsoft\Windows\INetCache\
+Chrome:
+Windows: C:\Users\<user_name>\AppData\Local\Google\Chrome\User Data\Default\Cache
+Unix/Linux: ~/.cache/google-chrome
+
+
+In firefox you can do about:cache to check cache details. to get the caching information 
+
+IN User-Agent you can change the user to mobiel and check what cache directives are being send by the browser
+
+-- Check for Re-set password, like what happens there Security questions, and other things. --> this is basically an API so check for API testing, IDOR, CSRF, DDOS, etc
+
+
+-- Try to SMS bomb other user using the reset password api (if rate limit is not there)
+
+-- password re-set api: Email link-set: is the link (with token) one time only cuz otherwise it is a consitent backdoor to the account, is the link HTTPs?, does it has time based expiry
+   Is the token random enough? is it JWT or session based
+
+-- Identify alternative authentication channels.
+Assess the security measures used and if any bypasses exists on the alternative channels.

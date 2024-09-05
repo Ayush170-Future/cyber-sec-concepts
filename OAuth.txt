@@ -1,0 +1,44 @@
+
+
+-- Check if you can change the redirect_url in the GET request to the Authorization server (ideally the AS must check if the redirect_url is same as given in the
+GET request)
+
+-- Check for the CSRF protection if not: you can link your account to someone elses account: Happened in Medium.
+
+-- Check the Authorization Code Injection flow
+
+Conduct the following tests against the AS:
+
+Send a valid code for another client_id
+Send a valid code for another resource owner
+Send a valid code for another redirect_uri
+Resend the code more than once (code replay)
+
+-- Testing for Exposed Client Secret:
+
+Check if the client-secret is stored on the frontend or not. Check by intercepting. If so try to steal is using XSS or something.
+
+Preventions:
+
+Use a client secret only if the client has the ability to store it securely.
+Follow best practices to store tokens securely. Treat them with the same security considerations as other credentials.
+Avoid deprecated OAuth grant types. See Testing for OAuth Weaknesses for further description.
+Avoid flows like Implicit, in general avoid security from the Client: because the surface area is just more than the server here.
+ - on the server the attacker needs to break the network security and do a lot more things, but in client its relatively easier.
+
+
+
+
+Hackerone reports:
+
+1. On redirect_uri: https://hackerone.com/reports/665651 
+2. Ask how is this working from Dhyey: https://hackerone.com/reports/1212374
+3. Redirect_uri + Open redirection: https://hackerone.com/reports/131202 
+   You can control a URL on some application so that it points to some URL that you control (Twitter still has this).
+   And then you could fill that URL into the redirect_uri parameter and login to that Twitter account.
+4. Redirect_uri + Path traversal on the URL: https://hackerone.com/reports/1861974 -- Very good attack.
+ - Path traversal is allowed on the URLs
+
+
+ Note: 
+ Redirect_uri is the most vulnerable thing: test for validation in it on the AS and also do validations for Path traversals

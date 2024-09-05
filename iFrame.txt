@@ -1,0 +1,14 @@
+Browser Context: 
+1) A browsing context is an environment in which a browser displays a Document. 
+In modern browsers, it usually is a tab, but can be a window or even only parts of a page, like a frame or an iframe.
+
+2) Each browsing context has an origin (that of the active document) and an ordered history of previously displayed documents.
+
+3) Communication between browsing contexts is severely constrained. Between browsing contexts of the same origin, a BroadcastChannel can be opened and used.
+
+IFrame:
+Basically a smaller Browser context into a bigger one, embedded another HTML page into the current one.
+- Each Iframe has its own origin therefore, SoP applies here as well.
+
+The topmost browser context is known as browser window represented by Window object
+

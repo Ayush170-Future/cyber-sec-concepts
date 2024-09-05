@@ -8,6 +8,24 @@ https://0ae0000004e251158151436d00a0005a.web-security-academy.net/image?filename
 
 Fuzzing with different encoded file paths to check if any works or not.
 
+In UNIX system: /etc/passwd is a default file path for passwords.
+
+Common validation could be to remove all possible ../ in the path whenever there is a file manipulation or fetch. So, we can mitigate it using the payload:
+....//....//....//etc/passwd
+
+URL Encoding:
+As with any kind of injection, you can also do URL-encoding to encode the ../ payload so that the web server doesn't remove it and at the time of processing it is automatically
+decoded by the Backend. For example in Express URL-decoding happens through a middleware.
+Can also do Double URL encoding (I'm not sure how this is going to be processed in teh backend, maybe you first time URL-decode to do the validation and then you do a decode before processing.
+I think URL decoded stuff (when it is in plain text) couldn't be decoded further so this doesn't affect the original backend logic )
+
+Learning: The way you code the backend is not the only way other people code the backend. They may include other all sorts of things like URL decoding inorder to make the application
+more secure.
+
+Goal: Identify all kinds of validation that are present in the application and try to figure out if there are some edge cases we can exploit.
+
+- Validatoin: The input must start with a perticular file name such as vvv/public/images, so we could do vvv/public/images/../../../
+
 
 
 Same preventions as the SQL injection ones:
@@ -20,5 +38,8 @@ Same preventions as the SQL injection ones:
     if (file.getCanonicalPath().startsWith(BASE_DIRECTORY)) {
         // process file
     }
+
+    Canonicalize gives the absolute path without any ./ or ../, basically it processses the path and give us the result. So, its always good to check if this begins with a base dir you want
+    before moving forward.
 
 

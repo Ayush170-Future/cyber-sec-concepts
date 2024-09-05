@@ -1,0 +1,61 @@
+
+Description:
+File upload vulnerabilities are when a web server allows users to upload files to its filesystem without sufficiently validating things like their name, type, contents, or size
+
+Sometimes just the act of submitting the file is enough to do remote code execution, other time you need to 
+call that file in a following HTTP request.
+
+File upload + Directory traversal vulnerabilities are really deadly since you can let attacker overwrite critical files.
+
+No Size validation: Can make attacker fill the entire space and let him do DoS attack.
+
+Again Blacklisting is not good, always think of Whitelisting for validation.
+
+Two factors:
+1) If the Server allows you to submit random files 
+2) If the Server is configured to execute your random files (a Python server would execute index.py file)
+
+WebShell:
+What you upload is webshell and try to run it by calling it from frontend or a endpoint.
+"<?php echo file_get_contents('/path/to/target/file'); ?>"
+You can upload this in a PHP file on any upload feature on an application and call that file in a GET request.
+
+Other payload:
+A more versatile web shell may look something like this:
+
+<?php echo system($_GET['command']); ?>
+This script enables you to pass an arbitrary system command via a query parameter as follows:
+
+GET /example/exploit.php?command=id HTTP/1.1
+
+Attack vectors:
+
+1) On validation on Content-Type not on the actual content in the HTTP request.
+2) File upload vulnerabilities + path traversal: Upload your file into a directory that has lesser restrictions by path traversing.
+3) Overwrite directory specific configuration:
+   You can upload directory specific configuration to allow MIME type you want to execute in the application.
+   Steps:
+   1. Upload configuration file to allow you attack file type to execute.
+   2. Upload the attack file
+   3. Get the Attack file
+4) Obfuscating file extensions:
+   We are trying to submit PHP file by giving these extensions:
+   1. exploit.pHp
+   2. exploit.php.jpg
+   3. exploit.php.
+   4. exploit%2Ephp (URL Encoded)
+   5. exploit.asp;.jpg or exploit.asp%00.jpg
+   6. Backend might defence itself by stripping away the dangerous file type but if this is not applied recursively this payload might bypass this:
+      exploit.p.phphp
+
+   You are trying to confuse MIME converter used by the backend to allow MIME type that is blacklisted
+5) Flawed validation of the file's contents:
+   A good line of defence is to verify Content-type and the content of the file as well
+
+   Properties that could be used for validation:
+   1. JPEG Files begin with FF D8 FF
+   3. Check for dimension of the JPEG (Script won't have dimension)
+
+   Bypass:
+   You can create Polyglot JPEG using ExifTool which contains malicious code in its metadata.
+   

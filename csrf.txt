@@ -1,0 +1,146 @@
+CSRF - Cross-Site Request Forgery (CSRF) is an attack that forces an end user to execute unwanted 
+actions on a web application in which they're currently authenticated.
+
+- Manipulate the user browser to send a HTTP request that they didn't intended
+
+CSRF is basically effective for the POST request from the client. Because the GET will get data
+to the user therefore no issues
+
+Browser automatically attaches the Cookie to the request, so we have to set the config of cookies good - none, strict, lex
+and also we can use CSRF token (same as the state param in the OAuth)
+
+Cookies can only be set from the backend if the origin matches of the server (host) and the domain they want to set cookie for.
+
+Good to dos:
+Most of the requests should be POST (POST is generally safer)
+Never change any state in the GET message because cookies might apply direclty there
+
+
+Same Origin Policy:
+- One script can access the resource of only the site with the same origin 
+
+Cases when SOP policy is relaxed:
+1) CORs - set by the backend on the frontend
+2) Cross origin embedding (iframe, script, img)
+- script tag can load scripts from different origins
+<script src="http://example.com/script.js"></script>
+<iframe src="http://anotherdomain.com/page.html"></iframe>
+<img src="http://example.com/image.jpg" alt="Example Image">
+
+CSRF with SOP:
+That means even with SOP applied. CSRF can still happen using iframe and your Browser will automatically attach necessary cookies to the request.
+In order to prevent this have SameSite (Strict, Lax, None) cookies, implement CSRF token
+
+Portection againsts Iframe CSRF attacks:
+1) use samesite in the cookies
+2) X-frame-options: tells the Browser weather the html can be embedded or not into a iframe
+3) implement CSRF token verification on the backend
+4) Content security policy
+
+Preventions:
+1) Anti-CSRF tokens are not stored in the Cookies because this defeats the purpose. Therefore
+it is stored in LocalStorage or SessionStorage. -> Therefore saving againsts CSRF attacks.
+-> But this is still prone to XSS attacks, make sure you deal with this.
+X-CSRF-Token -> Used to share the Token.
+Developers have to manually fetch it from Storage and add it.
+
+2) SameSite Cookies:
+3) Referer and Origin Header Validation:
+
+X-frame-options:
+(DENY or SAMEORIGIN) -> Doesn't allow your website to be embedded in some IFrame (in DENY no one can load the site in an iframe, in SAMEORIGIN if the origin is same then it is allowed)
+
+Exploits:
+1) Iframes: you can write Scripts inside the Iframe, XMLHttpRequest can be used to fetch information
+
+
+CSRF is not a SOP mitigation. We aren't reading anything using csrf.
+HTML form submission is a simple request where the browswer doesn't send any pre-flight request before it.
+
+All assmes that the user is logged in.
+
+STEPS:
+Do the prove of concept on your machine and then make a form exploit out of it and then just deliver it to the victim. there's no way for the attacker to know if the attack suceeded because 
+sop doesn't allow reads only allows simmple writes.
+
+
+To store CSRF we can also create csrf for all forms and include them into html directly like this: this is a response from the server:
+<div id=account-content>
+    <p>Your username is: carlos</p>
+    <p>Your email is: <span id="user-email">fasd.as1700@gmail.com</span></p>
+    <form class="login-form" name="change-email-form" action="/my-account/change-email" method="POST">
+        <label>Email</label>
+        <input required type="email" name="email" value="">
+        <input required type="hidden" name="csrf" value="qBnV5dMH8sPxGonMllaGbfDugwQUQAiN">
+        <button class='button' type='submit'> Update email </button>
+    </form>
+</div>
+
+LABS:
+
+1: FLAWS IN CSRF TOKEN VALIDATION:
+
+1) Validation of CSRF token depends on request method
+Maybe CSRF token is validated only on POST methods not on GET method. so you could use the GET method (if they are allowed) inorder to write the exploit that is going to be allowed even if 
+the CSRF token is not present.
+
+Signals when the http body has csrf token instead of the header therefore the coder must have forgotten about it while parsing the GET request. This is how I would forget I guess.
+
+2) Validation of CSRF token depends on token being present
+
+3) CSRF token is not tied to the user session:
+
+There is a global set of CSRF tokens (which may also be one time usuable) but not tied to a user session therefore I can login with my account and get the CSRF token and try to 
+do the exploit using CSRF.
+
+NOTE: CSRF token behaviour can be identified by log in into two accounts and try to figure out if there is a relationship among csrf tokens in them.
+CSRF token should ideally be: Unique, non-guessable value tied to the user-session. Perhaps derived from the user session only. maybe a hash or something.
+
+4) CSRF token is tied to a non-session cookie: Have to see how this is working.
+
+5) CSRF token is simply duplicated in a cookie (double submit): Have to see how this is working.
+
+
+2: SAMESITE ATTRIBUTE IN COOKIES BYPASS:
+
+1) Bypassing SameSite Lax restrictions using GET requests:
+   Lax automatically allows cookies addition to GET method. So, if the backend is not very fussy about the http method than it might be using POST and GET to do the same thing.
+   Therefore we can use this explot mf:
+   GET /my-account/change-email?email=ayushsingh@gmail.com&_method=POST HTTP/2 (this was POST)
+
+   Since browser automatically adds SameSite lax cookies when the method is GET and the top level nevigation is the same website (presssing the link, form submission, aakhri me uss website pe aana chaiye)
+
+2) Bypassing SameSite restrictions using on-site gadgets (HAVE TO STUDY THIS AFTER IDK WHEN THO, MAYBE WHEN USED)
+
+3: BYPASSING REFERER-BASED CSRF DEFENSES
+
+Relying solely on the Referer header validation on the backend is often very bad and shouldn't be done because its relatively easy to ommit the Referer tag and its purpose is something else.
+
+1) Validation of Referer depends on header being present( on backend ):
+
+We can use Meta tag in the POST form to omit the Referer tag set by the website (idk how it works internally)
+
+Payload:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Change Form</title>
+    <meta name="referrer" content="never">
+</head>
+<body onload="document.forms[0].submit()">
+    <form id="emailChangeForm" action="https://0a9b00fa044211f0819b252e008f0083.web-security-academy.net/my-account/change-email" method="POST">
+        <input type="hidden" name="email" value="newemail@example.com">
+    </form>
+</body>
+</html>
+
+2) Validation of Referer can be circumvented: 
+In this case maybe we can specify the correct referrer in the query of our (attacker website url) and the server while verifying the regex might consider this correct.
+
+Note: In an attempt to reduce the risk of sensitive data being leaked in this way, many browsers now strip the query string from the Referer header by default.
+
+
+
+
+
+JSON body me CSRF mushkill hai 

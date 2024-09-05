@@ -1,0 +1,34 @@
+Note: Robot.txt tells search engine crawlers which URLs the crawler can access on your site.
+
+Burp brute force to scavenge
+
+Insecure direct object references:
+IDOR is basically done using to Horizontal privilege escalate
+
+IDOR ke uppr reports padho hackerone pe -- kaha kaha pe IDOR kar rhe honge website wale generally. Static pages me, user logs (This contains all kind of 
+sensitive information and would be amazing if you can get your hands on this, bro)
+), chats me, chatgpt pe share hota hai uspe
+                                                                                                                                            (I won't be able to brute force this)
+
+Hackerone reports for IDOR: https://corneacristian.medium.com/top-25-idor-bug-bounty-reports-ba8cd59ad331
+
+I can work in office even in noise. Why I can't do this in the room.
+
+
+Preventions:
+1) Obfuscation shouldn't be confused with security. A determined hacker like myself would be able to find things using reverse engineer, scavenging
+
+How do I find where to attack:
+I mean I know the attack, I know how it works, but I don't know where to execute it (i don't know all the sinks or even potential sinks)
+I think looking at the labs of that attack on the port swigger is a good way to revise atleast
+
+Reading Port swigger kinda makes you feel that the entire internet is vulnerable but it is not to the extent they protect, it is tho more than I imagine it to be.
+
+
+NOTE ON IDOR:
+
+I will use some kind of ID always on the frontend to deal with the backend and there's no way to not have the id.
+Therefore the only way to prevent this that comes to my mind is either deriving the id from the Session information or JWT token.
+
+There could be case when you want to delete or edit a specific photo, now you can't derive the id from the session anymore
+Therefore the only way out of this is we have validation at every end point (api) and check if the session id or the token is authorized to do this action.

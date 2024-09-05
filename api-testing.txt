@@ -1,3 +1,6 @@
+1. Get the API documentation. Use Burp Crawl to Crawl over all the routes present for that API and check for the documentation.
+
+
 Lab1: Exploit an API endpoint using Documentation.
 
 Find the route with the Documentation. Mostly /api will have the Documentation
@@ -36,3 +39,13 @@ Preventions:
 Hide your API Documentation if you don't want the API to be publically accessible.
 Validate Content-type for all requests.
 Don't give too much information away in the responses, only send what is necessary.
+
+
+Parameter Pollution:
+
+?user=ayush&user=naman -- you can give multiple parameter and observe
+-- Depends on the application whether is considers first or last or whole occurence of the user.
+-- PHP usually considers the last occurence, while APACHE tomcat considers the first one.
+-- Always URL encode this tho, otherwise it will be caught very soon
+
+https://www.youtube.com/watch?v=QVZBl8yxVX0 

@@ -1,0 +1,63 @@
+What is CSP (content security policy)?
+CSP is a browser security mechanism that aims to mitigate XSS and some other attacks. It works by restricting the resources (such as scripts and images) that a page can load and restricting whether a page can be framed by other pages.
+
+To enable CSP, a response needs to include an HTTP response header called Content-Security-Policy with a value containing the policy. The policy itself consists of one or more directives, separated by semicolons.
+
+Restricting Source Origins
+CSP allows you to specify which sources of content are considered trusted for your website. This includes scripts, styles, images, and other resources. By default, browsers can load resources from any origin, but CSP enables you to restrict this behavior.
+
+For example, you can define a policy that allows scripts to be loaded only from your own domain and specific trusted domains. Here’s an example CSP header:
+
+Content-Security-Policy: script-src 'self' https://trustedscripts.example.com
+This policy instructs the browser to only execute scripts that are loaded from the same origin ('self') or from trustedscripts.example.com. Any inline scripts or scripts from untrusted origins will be blocked, preventing the execution of malicious code that an attacker might inject.
+
+2. Blocking Inline Scripts
+One of the most common vectors for XSS attacks is inline scripts. CSP can block the execution of inline scripts, which are often used in XSS attacks.
+
+Here’s how you can configure CSP to block inline scripts:
+
+Content-Security-Policy: script-src 'self'; object-src 'none'; base-uri 'self';
+In this example, the script-src 'self' directive allows scripts only from the same origin and blocks all inline scripts unless explicitly allowed using a nonce or a hash.
+
+3. Using Nonces and Hashes
+CSP provides mechanisms to allow specific inline scripts by using nonces (numbers used once) or hashes. These mechanisms ensure that only intended scripts are executed.
+
+Content-Security-Policy: script-src 'self' 'nonce-2726c7f26c';
+In this example, a nonce (2726c7f26c) is generated and included in the CSP header. Inline scripts in the HTML must include this nonce in their script tag to be executed:
+
+<script nonce="2726c7f26c">
+  // Your script here
+</script>
+Any inline script without the matching nonce will be blocked.
+
+Content-Security-Policy: script-src 'self' 'sha256-abc123...';
+In this case, a hash of the inline script content is provided. The browser calculates the hash of each inline script and only executes those that match the hash specified in the CSP header.
+
+4. Reporting Violations
+CSP can also be configured to report violations. When a script or resource violates the policy, the browser can send a report to a specified URL, helping you to monitor and address potential security issues.
+
+Example:
+
+Content-Security-Policy: script-src 'self'; report-uri /csp-violation-report-endpoint/
+
+
+basically, doesn't stop you from doing XSS but blocks the execution of malicious scripts on the web page.
+
+
+Sometimes you might be able to inject policies inside CSP and that should get you write your own policy.
+
+Protecting against clickjacking using CSP:
+The following directive will only allow the page to be framed by other pages from the same origin:
+
+frame-ancestors 'self'
+The following directive will prevent framing altogether:
+
+frame-ancestors 'none'
+Using content security policy to prevent clickjacking is more flexible than using the X-Frame-Options header because you can specify multiple domains and use wildcards. For example:
+
+frame-ancestors 'self' https://normal-website.com https://*.robust-website.com
+CSP also validates each frame in the parent frame hierarchy, whereas X-Frame-Options only validates the top-level frame.
+
+Using CSP to protect against clickjacking attacks is recommended. You can also combine this with the X-Frame-Options header to provide protection on older browsers that don't support CSP, such as Internet Explorer.
+
+

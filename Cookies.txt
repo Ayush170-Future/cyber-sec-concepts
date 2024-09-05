@@ -1,0 +1,43 @@
+Document.cookies = "key=value";
+
+or
+
+Set-Cookie: id=new-value (from server side, in http response)
+
+Example: Set-Cookie: id=a3fWa; Expires=Thu, 21 Oct 2021 07:28:00 GMT; Secure; HttpOnly
+
+Block access to a Cookie:
+
+1) Secure:  this is only sent from the browser when there's HTTPs protocol (encrption)
+            Therefore Man-in-the-Middle couldn't access it anyone.
+
+2) HttpOnly attribute:  JS can't access this type of cookies using Document.Cookie
+                        Portection againsts XSS attack, if someone is able to inject JS into your website.
+                        Then they won't be able to modify using Document.cookie
+                        Saves againsts XSS attack, when someone could inject JS into your website and access these cookies
+
+Cookie attribute:
+
+1) Domain:
+    Set-Cookie: id=a3fWa; Expires=Thu, 21 Oct 2021 07:28:00 GMT; Secure; HttpOnly; Domain=mozilla.org
+    Domain can be set by the server. One server can't set a separate
+    Not setting Domain in the Set-Cookie will set it to the server domain and not to its subdomains
+
+2) Path:
+    Set-Cookie: id=a3fWa; Expires=Thu, 21 Oct 2021 07:28:00 GMT; Secure; HttpOnly; Path=/docs
+
+3) SameSite:
+    Controls on which Cross site request the Cookie is going to be attached
+    Example: A gmail might contain link of buying some product, there could an afflieat link of your friends website on your website and there you want to give the cookie in the
+    request
+    In all these cases you don't want the SameSite to be strict
+    Options: Strict, Lax, None
+    
+    Lax - The browser also sends the cookie when the user navigates to the cookie's origin site (even if the user is coming from a different site) and also the request has to GET.
+    In None the connection has to secure
+
+Anti-CSRF tokens are not stored in the Cookies because this defeats the purpose. Therefore
+it is stored in LocalStorage or SessionStorage. -> Therefore saving againsts CSRF attacks.
+-> But this is still prone to XSS attacks, make sure you deal with this.
+X-CSRF-Token -> Used to share the Token.
+Developers have to manually fetch it from Storage and add it.

@@ -1,0 +1,23 @@
+Note out all the entry points in the spreadsheet with wheather the connecetion is authenticated or not, wheather the connection has web socket or not, 
+wheather the connection is a part of a multi step process, wheather it has TLS or not.
+
+( https://github.com/OWASP/wstg/blob/master/document/4-Web_Application_Security_Testing/01-Information_Gathering/06-Identify_Application_Entry_Points.md) 
+
+Load balancing type of threats: Also note where any interesting headers are used. For example, Server: BIG-IP indicates that the site is load balanced. Thus, if a site is load balanced and one server is incorrectly configured, then the tester might have to make multiple requests to access the vulnerable server, depending on the type of load balancing used.
+
+
+Next, Identify all the workflows in the web-application (earlier we identified all the entry points, now we find all the principle workflows) 
+
+Next, Identify the web framework and all the tech that is being used using Wappalyzer or something.
+
+
+How to Detect reverse proxy:
+1. Multiple applciaitons with differnet langugaew using the same IP.
+2. Multiple Server headers
+It is not always possible to detect a reverse proxy (especially if there is only a single application behind it), but you can sometimes identify it by:
+
+A mismatch between the frontend server and the backend application (such as a Server: nginx header with an ASP.NET application)
+This can sometimes lead to request smuggling vulnerabilities
+Duplicate headers (especially the Server header)
+Multiple applications hosted on the same IP address or domain (especially if they use different languages)
+

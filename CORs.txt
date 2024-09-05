@@ -1,0 +1,67 @@
+CORs can be set from the backend using the Access-Control-Allow-Origin, Access-Control-Allow-Credentials header.
+
+Headers are the most important thing in Web Security.
+
+Origin header is applied by the browser whenever there is any cross origin request
+Before any Cross origin request browser apply Pre-flight request that is basically Options request, if that has Access-Control-Allow-Origin: https://malicious-website.com
+Access-Control-Allow-Credentials: true headers than the CORs is allowed otherwise not.
+
+Most browsers doesn't allow * to be a valid value for that header.
+
+Most of these are done automatically by the browsers.
+
+Pre-flight checks:
+Done by the browser before executing any cross domain request. Here basically you want to get info about what all methods, domains are required.
+Example: 
+OPTIONS /data HTTP/1.1
+Host: <some website>
+...
+Origin: https://normal-website.com
+Access-Control-Request-Method: PUT
+Access-Control-Request-Headers: Special-Request-Header
+
+Host in http request: is the one doing the request
+
+CORs is controlled relaxation of the Same origin policy
+
+In Same origin policy, some tags like img, iframe are allowed to access resources of some other origin but they can't be accessed by the JS outside of it. I mean even if you get something inside
+the iframe, you won't be able to access it in JS.
+
+Vulnerabilities in CORs implementation:
+
+1) Server sab origins ko allow kardeta hai: bas origin specify karo or Access-Control-Allow-Origin: https://malicious-website.com
+Access-Control-Allow-Credentials: true aajayenge
+2) Whitelisted null origin value
+3) Trust relationship with other subdomain or another origin: That website might be attackable with XSS and you might inject a script into it and cause a connection to the original website.
+                                                            and run attack
+
+Remarks:
+1) CoRs should never be your primary protection. Have individual protection for all kind of attacks. CoRs is just a prevention
+2) Can use Iframe or anything if there is a CoRs weakness, only when X-Frame-Options: is not SAMEORIGIN and the Access-Control-Allow-Credentials: true.
+3) Every CoRs based attack is dependent on: Access-Control-Allow-Credentials: true, otherwise the attacker will only be able to access unprotected resources which is useless
+
+CoRs is just a prevention for CSRF doesn't protect it properly.
+
+Cases when Browser might skip adding Origin header:
+1) Simple Requests: According to the CORS specification, for "simple requests" (GET, HEAD, and sometimes POST requests with certain content types), the "Origin" header may not be included
+
+
+Meesho behaviour:
+1) OPTIONS pe allow every origin
+2) I think other than that doesn't allow any origin
+
+
+
+CoRs is entirely client side.
+
+SoP is entirely client side. SoP doesn't allow different origin to read data of different origin but different can create a post request, write is allowed. if its an api call then it will goto CoRs and 
+                             we can stop this using Anti forgery tokens. which other domain couldn't read because of sop.
+
+CoRs is entirely client side. It just adds the header: Access-Control-Allow-Origin and other Cors header. It just serves option request from the frontend. 
+It doesn't do any kind of validation on the backend. If a request comes from the postman with a blacklisted origin than also it is going to be allowed.
+https://stackoverflow.com/a/45069745/15295860
+
+
+Configuration:
+1) Preflight request is send when using fetch POST but not when using form-auto-submit:
+https://stackoverflow.com/questions/39725955/why-is-there-no-preflight-in-cors-for-post-requests-with-standard-content-type#:~:text=The%20reason%20CORS%20doesn't,new%20restrictions%20on%20what%20was  
