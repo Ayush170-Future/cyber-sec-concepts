@@ -98,3 +98,14 @@ OWASP is better than Port Swigger in terms of learning since it has more practic
 
 
 Google Doc: https://docs.google.com/document/d/1OIqkC2hjxp-ZDskgfkjV0ESR6hF3vu9p1_wGd20A1D0/edit 
+
+https://www.blackhat.com/docs/us-17/thursday/us-17-Tsai-A-New-Era-Of-SSRF-Exploiting-URL-Parser-In-Trending-Programming-Languages.pdf -> Good artical on URL parsers and how to exploit ssrf in them.
+
+
+It's usually good to try out different payloads because mostly you are not a security researhcer and knowing all of these is difficult, you can should use all kinds of payload 
+inorder to Cover everything.
+
+There are always two levels one where the verificiation happens and the one where the implementation happens, and the machanism they use is different, so test that out
+
+How to detect Blind SSRF: 
+Use Out of Band technique: use burp collaborator and try to make request from vulnerable bacekend to your machine.
