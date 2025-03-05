@@ -1,0 +1,3 @@
+To read report: https://hackerone.com/reports/414101 
+
+Android security check sheet: [https://blog.oversecured.com/Android-security-checklist-webview](https://blog.oversecured.com/Android-security-checklist-webview/)

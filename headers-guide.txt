@@ -1,0 +1,3 @@
+cache-control: set by the server for controlling if the response will be cached at CDN or browser level or not.
+x-forwared-for: a de-facto standard header for identifying the originating IP address of a client connecting to a web server through a proxy server 
+x-forwarded-scheme and x-forwarded-proble: are also used by the cdn or proxy to store the information of the original requesting server (for example there value is http) (https://hackerone.com/reports/1181946)

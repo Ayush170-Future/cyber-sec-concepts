@@ -1,0 +1,14 @@
+When thinking of Business logic vulnerability think how the developer might have coded this: this is easier when done white box
+
+but can be done in black box as well
+
+Take Hypothesis and let those scenario run --> try to thing what worst thing that can happen if this Hypothesis is true and then valiate the typothessis:
+
+example in the RAP testing that I did for supplier panel:
+Can supplier end the subscription multiple times and have different end dates?
+
+Supplier can use this to exploit the free trial. let's say supplier has stoped the free trial and now after a month he again stops this might result in the update of the end date in the subscription cycle table because it might update the latest cycle entry because they might thing a supplier can only have one subscription at a time which is true but this is vulnerability if the end payout is dependent on the Subscription cycle table
+
+This doesn't make sense for a paid subscription since they can just not stop the subscription and let it running for the same result.
+
+But if this can happen for a FREE trial than this is a lottery!!!!

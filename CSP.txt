@@ -61,3 +61,10 @@ CSP also validates each frame in the parent frame hierarchy, whereas X-Frame-Opt
 Using CSP to protect against clickjacking attacks is recommended. You can also combine this with the X-Frame-Options header to provide protection on older browsers that don't support CSP, such as Internet Explorer.
 
 
+
+
+fixes: 
+
+Content-Security-Policy: script-src 'self' https://panelchunks-internal.meeshosupplyassets.com;
+
+

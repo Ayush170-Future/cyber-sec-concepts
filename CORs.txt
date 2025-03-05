@@ -65,3 +65,10 @@ https://stackoverflow.com/a/45069745/15295860
 Configuration:
 1) Preflight request is send when using fetch POST but not when using form-auto-submit:
 https://stackoverflow.com/questions/39725955/why-is-there-no-preflight-in-cors-for-post-requests-with-standard-content-type#:~:text=The%20reason%20CORS%20doesn't,new%20restrictions%20on%20what%20was  
+
+
+
+
+CSRF and CoRs together: https://claude.ai/chat/7dc7610a-331f-495f-a8cd-c4cab63a8705 see whole thread just. 
+
+There are two kinds of request simple (like form post) and non-simple like fetch() (this is one of the ajax requests). In simple the cors is not inforced because they pre-dates cors but in fetch the cors is enforced the server need to expilcitely allow the evil.com for allowing the evil.com to access the token

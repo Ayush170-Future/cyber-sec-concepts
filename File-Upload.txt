@@ -59,3 +59,7 @@ Attack vectors:
    Bypass:
    You can create Polyglot JPEG using ExifTool which contains malicious code in its metadata.
    
+6) Some websites uses Magic bytes to get the content-type and if that content type is valid we can upload malicious files
+   Magic bytes: https://en.wikipedia.org/wiki/List_of_file_signatures
+   Convert Image to text: https://capitalizemytitle.com/image-to-binary-converter/ 
+   Good payloads: https://github.com/pranav77/XSS-using-SVG-file/blob/master/XSS.png   

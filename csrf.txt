@@ -144,3 +144,16 @@ Note: In an attempt to reduce the risk of sensitive data being leaked in this wa
 
 
 JSON body me CSRF mushkill hai 
+
+
+browser doesn't send pre-flight request with certain headers and http req method eg: form-post is a simple request 
+hacktrick article is good for this
+
+https://www.intigriti.com/researchers/blog/hacking-tools/csrf-a-complete-guide-to-exploiting-advanced-csrf-vulnerabilities -- content-type csrf and other types
+
+
+https://medium.com/@ethicalevil/lets-talk-csrf-again-e58bd5b240ca -- Good article
+
+The Second answer is good to understand: https://claude.ai/chat/7dc7610a-331f-495f-a8cd-c4cab63a8705 
+
+https://www.directdefense.com/csrf-in-the-age-of-json/ json csrf

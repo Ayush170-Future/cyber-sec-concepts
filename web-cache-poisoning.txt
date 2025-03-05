@@ -1,0 +1,64 @@
+What is the difference between web cache poisoning and web cache deception?
+
+In web cache poisoning, the attacker causes the application to store some malicious content in the cache, and this content is served from the cache to other application users.
+
+In web cache deception, the attacker causes the application to store some sensitive content belonging to another user in the cache, and the attacker then retrieves this content from the cache.
+
+
+
+Steps:
+
+1. Identify all the non-keyed componenet of the request
+
+Sometimes even if the cache-control flags are not set to caching then also the CDN (WAF) might cache the response. So, identify unkeyed params and exploit the request.
+
+In anycase, sometimes the server might ask the Caching service to cache the response by adding this header: Cache-Control: public
+
+We can use headers like X-Forwared-Scheme: http to cache the 301 redirect response and therefore making it a dos (https://hackerone.com/reports/1181946)
+
+x-forwarded-scheme is a non-keyed parameter therefore it can help us get vulnerability reponse cached --> Cache poisoning
+
+Sometimes if the service is behind CDN or WAF, adding X-Forwared-Scheme can result into 301 redirect and also the response will be cached
+
+Downstream Caching:
+There is Property Configuration in Akamai where you specify caching rules: the Akamai Edge server is also reponsible for the caching Configuration on the browser (client), it only
+allows the cache of an object to be less than the TTL in the Edge server (or less any time lesser than it if supplied by the server in cache-control or expires).
+
+This is How Akamai decide what to cache and what to not cache:
+https://stackoverflow.com/questions/52722976/does-akamai-caches-everything-on-a-host-or-i-must-use-headers-to-tell-which-to-c 
+
+Resources:
+
+Good article on Web Cache Deception: https://www.blackhat.com/docs/us-17/wednesday/us-17-Gil-Web-Cache-Deception-Attack.pdf
+https://book.hacktricks.xyz/pentesting-web/cache-deception
+
+https://github.com/rack/rack/issues/1809 --> X-forwared-scheme
+https://hackerone.com/reports/1181946
+
+Cloudflare caching document: https://developers.cloudflare.com/cache/how-to/cache-keys/
+
+I don't think Twitter is paying enough attention to non product things these days so let's try to attack twitter and find only cache vulnerabilities.
+
+Cf-Cache-Status: HIT when Cloudflare caches hits
+
+
+
+
+Presentation:
+
+- What is Cache in CDN:
+
+Good article: https://www.imperva.com/learn/performance/cdn-caching/ 
+Cover what is cdn, how it works, what kind of response it caches, what headers are used in this, finally what is keyed and unkeyed
+
+How can you write cache rules in Akamai and CF. Is it api based or path (regex) based. What is written in it.
+
+Cachable content has something like: Cache-Control: public, max-age=31536000
+ETag: "hash-of-content"
+Vary: Accept-Encoding
+
+Uncacheble content should be like: Cache-Control: no-store, private
+Pragma: no-cache
+
+Took what is cdn from this article: https://www.cloudflare.com/en-gb/learning/cdn/what-is-a-cdn/
+    Reverse proxy and CDN, so all requests first goto Cloudlfare for example and it checks cache hit or miss, in case of miss it relays the request to original server.

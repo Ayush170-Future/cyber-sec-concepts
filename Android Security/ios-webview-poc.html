@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Page</title>
+</head>
+<body>
+  <h1>Custom HTML Page</h1>
+  <p>This is a standalone HTML page integrated into your React project.</p>
+
+  <script>
+    // Function to log data for app initiation
+    window.appInitiate = function (data) {
+      if (typeof window !== 'undefined') {
+        console.log("appInitiate called with data:", data);
+      }
+    };
+  
+    // Function to log data for app refresh initiation
+    window.appRefreshInitiate = function (data) {
+      if (typeof window !== 'undefined') {
+        console.log("appRefreshInitiate called with data:", data);
+      }
+    };
+  
+    // Function to log data and refresh the page
+    window.refreshCommunity = function (data) {
+      if (typeof window !== 'undefined') {
+        console.log("refreshCommunity called with data:", data);
+        window.location.reload();
+      }
+    };
+  
+    // Automatically executed code on page load
+    document.addEventListener("DOMContentLoaded", function () {
+      console.log("Page loaded. Executing appInitiate automatically...");
+      window.appInitiate({ message: "Hello from appInitiate on page load!" });
+    });
+  </script>
+  
+</body>
+</html>
