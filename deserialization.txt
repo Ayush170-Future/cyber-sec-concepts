@@ -1,0 +1,1 @@
+Resources: https://waratek.com/blog/java-deserialization-vulnerability/
